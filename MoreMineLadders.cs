@@ -1,70 +1,61 @@
-﻿using System;
-using System.IO;
+﻿using Harmony;
 using StardewModdingAPI;
-using StardewValley.Locations;
-using Harmony;
 using StardewValley;
+using StardewValley.Locations;
+using MoreMineLadders.Framework;
+using MoreMineLadders.Framework.Patches;
 
 namespace MoreMineLadders
 {
-    public class MoreMineLadders : Mod
-    {
+	
+	public class MoreMineLadders : Mod
+	{
+	    public static MoreMineLadders Instance;
+
+
+	    public HarmonyInstance Harmony;
+
+
+	    public MoreMineLaddersConfig Config;
+
+
         public override void Entry(IModHelper mod)
-        {
-            instance = this;
-            InitConfig();
+		{
+			Instance = this;
+			InitConfig();
 
-            harmony = HarmonyInstance.Create("JadeTheavas.StardewValley.MoreMineLadders");
+            //Harmony
+			Harmony = HarmonyInstance.Create("JadeTheavas.StardewValley.MoreMineLadders");
+			Harmony.Patch(AccessTools.Method(typeof(MineShaft), "createLadderDown"), new HarmonyMethod(typeof(CreateLadderDownPatch), "Prefix"), null);
+			Harmony.Patch(AccessTools.Method(typeof(MineShaft), "checkStoneForItems"), new HarmonyMethod(typeof(CheckStoneForItemsPatch), "Prefix"), new HarmonyMethod(typeof(CheckStoneForItemsPatch), "Postfix"));
+            
+            //Add commands
+            mod.ConsoleCommands.Add("makeladder", "Creates a ladder at the player's position.",MakeLadder);
+			mod.ConsoleCommands.Add("mml_reloadconfig", "Reloads your MoreMineLadders settings from config.", ReloadConfig);
+		}
 
-            harmony.Patch(AccessTools.Method(typeof(MineShaft), "createLadderDown"), 
-                new HarmonyMethod(typeof(createLadderDown_Patch), "Prefix"), null);
-            harmony.Patch(AccessTools.Method(typeof(MineShaft), "checkStoneForItems"), 
-                new HarmonyMethod(typeof(checkStoneForItems_Patch), "Prefix"), 
-                new HarmonyMethod(typeof(checkStoneForItems_Patch), "Postfix"));
+		
+		private void InitConfig()
+		{
+			Config = Helper.ReadConfig<MoreMineLaddersConfig>();
+		}
 
-            mod.ConsoleCommands.Add("makeladder", "Creates a ladder at the player's position.", new Action<string, string[]>(this.MakeLadder));
-            mod.ConsoleCommands.Add("mml_reloadconfig", "Reloads your MoreMineLadders settings from config.", new Action<string, string[]>(this.InitConfig));
-        }
+		//Commands
+		private void MakeLadder(string cmd, string[] args)
+		{
+			if (!Game1.inMine)
+			{
+				Monitor.Log("You need to be inside the mine to use this command.", LogLevel.Trace);
+				return;
+			}
+			Game1.mine.createLadderDown(Game1.player.getTileX(), Game1.player.getTileY());
+			Monitor.Log($"Created a ladder at the player's position: {Game1.player.getTileLocation()}", LogLevel.Trace);
+		}
 
-        void InitConfig(string cmd = null, string[] args = null)
-        {
-            string cfg_path = Path.Combine(base.Helper.DirectoryPath, "config.json");
-            if (!File.Exists(cfg_path))
-            {
-                base.Monitor.Log("No config file found. Creating a new one.");
-                this.config = new MoreMineLadders_Config();
-                base.Helper.WriteJsonFile<MoreMineLadders_Config>(cfg_path, this.config);
-                return;
-            }
-            this.config = base.Helper.ReadJsonFile<MoreMineLadders_Config>(cfg_path);
-        }
-
-        void MakeLadder(string cmd, string[] args)
-        {
-            if (!Game1.inMine)
-            {
-                base.Monitor.Log("You need to be inside the mine to use this command.", LogLevel.Alert);
-                return;
-            }
-
-            Game1.mine.createLadderDown(Game1.player.getTileX(), Game1.player.getTileY());
-            base.Monitor.Log("Created a ladder at the player's position." + Game1.player.getTileLocation().ToString(), LogLevel.Alert);
-        }
-
-        public static MoreMineLadders instance;
-
-        public HarmonyInstance harmony;
-
-        public MoreMineLadders_Config config;
-    }
-
-    public class MoreMineLadders_Config
-    {
-        public bool Enabled = true;
-
-        public bool affectedByLuck = false;
-
-        public float dropLadderChance = 0.1f;
-
-    }
+	    private void ReloadConfig(string cmd, string[] args)
+	    {
+	        InitConfig();
+            Monitor.Log("The config was reloaded.");
+	    }
+	}
 }

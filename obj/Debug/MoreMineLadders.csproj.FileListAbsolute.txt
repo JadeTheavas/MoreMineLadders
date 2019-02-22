@@ -1,0 +1,7 @@
+C:\Users\eurio\Desktop\Stardew_Mods_To_Update\MoreMineLadders\bin\Debug\MoreMineLadders.dll
+C:\Users\eurio\Desktop\Stardew_Mods_To_Update\MoreMineLadders\bin\Debug\MoreMineLadders.pdb
+C:\Users\eurio\Desktop\Stardew_Mods_To_Update\MoreMineLadders\bin\Debug\0Harmony.dll
+C:\Users\eurio\Desktop\Stardew_Mods_To_Update\MoreMineLadders\obj\Debug\MoreMineLadders.csproj.CoreCompileInputs.cache
+C:\Users\eurio\Desktop\Stardew_Mods_To_Update\MoreMineLadders\obj\Debug\MoreMineLadders.csproj.CopyComplete
+C:\Users\eurio\Desktop\Stardew_Mods_To_Update\MoreMineLadders\obj\Debug\MoreMineLadders.dll
+C:\Users\eurio\Desktop\Stardew_Mods_To_Update\MoreMineLadders\obj\Debug\MoreMineLadders.pdb
